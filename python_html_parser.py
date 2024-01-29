@@ -39,6 +39,7 @@ class TagElement(Element):
         return "".join((
             "Tag<"
             f"tag={self.tag}",
+            # f", attrs={self.attrs}" if self.attrs else "",
             # f", children={len(self.children)}" if children_repr else "",
             f", children={children_repr}" if children_repr else "",
             ">"
@@ -47,20 +48,20 @@ class TagElement(Element):
 
 class TargettedParser(HTMLParser):
     """
-    Parser de HTML permettant de trouver tous les éléments d’un type de
-    balise spécifique avec une classe spécifique optionnelle dans du HTML.
+    Parser de HTML permettant de trouver tous les éléments d’un type
+    de balise spécifique avec des attributs spécifiques dans du HTML.
     """
 
     target_tag: str                             # Le type de balise ciblée
-    target_class: str | None                    # La classe, s’il y en a une, de la balise ciblée
+    target_attrs: dict[str, str] | None         # Les attributs et valeurs ciblées, s’il y en a
     _current_elements_stack: list[TagElement]   # Pile d’éléments étant en train d’être parsés
     found_elements: list[TagElement]            # Liste d’éléments correspondant à la cible
 
 
-    def __init__(self, target_tag: str, target_class: str | None = None):
+    def __init__(self, target_tag: str, target_attrs: dict[str, str] | None = None):
         HTMLParser.__init__(self)
         self.target_tag = target_tag
-        self.target_class = target_class
+        self.target_attrs = target_attrs
         self._current_elements_stack = []
         self.found_elements = []
 
@@ -73,10 +74,18 @@ class TargettedParser(HTMLParser):
         # Si la balise n’est pas du bon type, on s’arrête
         if tag != self.target_tag:
             return False
-        # Si une classe cible est définie et qu’elle n’est pas présente, on s’arrête
-        if self.target_class is not None and ("class", self.target_class) not in attrs:
-            return False
-
+        # Si des attributs cibles sont définis et qu’un des attributs
+        # de la balise n’a pas la valeur ciblée, on s’arrête
+        if self.target_attrs is not None:
+            # Convertit les attributs en un dictionnaire
+            attrs_dict = dict(attrs)
+            # Pour chaque attribut ciblé
+            for target_attr, target_value in self.target_attrs.items():
+                # Si l’attribut ciblé n’est pas dans les attributs ou si
+                # la valeur de l’attribut n’est pas la bonne, on s’arrête
+                value = attrs_dict.get(target_attr)
+                if value is None or value != target_value:
+                    return False
         return True
 
 
@@ -158,8 +167,8 @@ def flatten_content_of_element(element: TagElement | ContentElement) -> str:
 
 
 def main():
-    parser = TargettedParser("balise1")
-    html = "<balise1><balise2><balise3>contenu_balise3</balise3>contenu_balise2</balise2>contenu_balise1</balise1>"
+    parser = TargettedParser("balise2", target_attrs={"attribut2": "valeur2"})
+    html = "<balise1 attribut1=valeur1><balise2 attribut2=valeur2><balise3 attribut3=valeur3>contenu_balise3</balise3>contenu_balise2</balise2>contenu_balise1</balise1>"
 
     parser.feed(html)
 
@@ -167,7 +176,7 @@ def main():
     print(*parser.found_elements, sep="\n\n")
 
     print("Contenu aplati : ", flatten_content_of_element(parser.found_elements[0]))
-    print("Contenu attendu : contenu_balise3contenu_balise2contenu_balise1")
+    print("Contenu attendu : contenu_balise3contenu_balise2")
 
 
 if __name__ == '__main__':
