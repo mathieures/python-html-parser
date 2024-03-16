@@ -37,7 +37,7 @@ class TagElement(Element):
     def __repr__(self) -> str:
         children_repr = f"{[repr(child) for child in self.children]}" if self.children else None
         return "".join((
-            "Tag<"
+            "Tag<",
             f"tag={self.tag}",
             # f", attrs={self.attrs}" if self.attrs else "",
             # f", children={len(self.children)}" if children_repr else "",
@@ -179,5 +179,5 @@ def main():
     print("Contenu attendu : contenu_balise3contenu_balise2")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
