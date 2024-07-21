@@ -12,7 +12,7 @@ See the `main` function in `python_html_parser.py`.
 
 I started to write this module because I wanted to keep a project I was developing with as few depdendencies as possible. Instead of relying on `BeautifulSoup`, that I often use, I wondered if I could write my own custom HTML parser, tailored to my needs, written in 100 % standard Python. The advantage I see in having this file in a project instead of `BeautifulSoup` is that everything is in one file.
 
-The `TargettedParser` class could be compared to BeautifoulSoup's `SoupStrainer`, but way less advanced. The advantage of this class is that everything fits in one file, which I personally like.  
+The `TargettedParser` class could be compared to BeautifulSoup's `SoupStrainer`, but way less advanced. The advantage of this class is that everything fits in one file, which I personally like.  
 
 ## Possible improvements
 
